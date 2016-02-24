@@ -375,7 +375,11 @@ class Shadowsocks
     })
     updateTraffic(0, 0, 0, 0)
 
-    // Bind to the service
+    bindToService()
+  }
+
+  // Bind to the service
+  def bindToService() {
     handler.post(() => attachService)
   }
 
