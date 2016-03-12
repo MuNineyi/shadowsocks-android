@@ -326,7 +326,7 @@ class Shadowsocks
           handler.post(() => onActivityResult(Shadowsocks.REQUEST_CONNECT, Activity.RESULT_OK, null))
         }
       } else {
-        serviceStart()
+        serviceLoad()
       }
     }
   }
@@ -365,21 +365,6 @@ class Shadowsocks
     updateTraffic(0, 0, 0, 0)
 
     handler.post(() => attachService)
-  }
-
-  def reloadProfile() {
-    currentProfile = ShadowsocksApplication.currentProfile match {
-      case Some(profile) => profile // updated
-      case None =>                  // removed
-        ShadowsocksApplication.profileManager.getFirstProfile match {
-          case Some(first) => ShadowsocksApplication.switchProfile(first.id)
-          case None => ShadowsocksApplication.profileManager.createDefault()
-        }
-    }
-
-    updatePreferenceScreen()
-
-    serviceStop()
   }
 
   protected override def onPause() {
@@ -432,7 +417,20 @@ class Shadowsocks
     ConfigUtils.refresh(this)
 
     // Check if current profile changed
-    if (ShadowsocksApplication.profileId != currentProfile.id) reloadProfile()
+    if (ShadowsocksApplication.profileId != currentProfile.id) {
+      currentProfile = ShadowsocksApplication.currentProfile match {
+        case Some(profile) => profile // updated
+        case None =>                  // removed
+          ShadowsocksApplication.profileManager.getFirstProfile match {
+            case Some(first) => ShadowsocksApplication.switchProfile(first.id)
+            case None => ShadowsocksApplication.profileManager.createDefault()
+          }
+      }
+
+      updatePreferenceScreen()
+
+      if (serviceStarted) serviceLoad()
+    }
 
     updateState()
   }
@@ -476,7 +474,7 @@ class Shadowsocks
   }
 
   def recovery() {
-    serviceStop()
+    if (serviceStarted) serviceStop()
     val h = showProgress(R.string.recovering)
     ThrowableFuture {
       reset()
@@ -495,14 +493,14 @@ class Shadowsocks
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) = resultCode match {
     case Activity.RESULT_OK =>
-      serviceStart()
+      serviceLoad()
     case _ =>
       cancelStart()
       Log.e(Shadowsocks.TAG, "Failed to start VpnService")
   }
 
   def serviceStop() {
-    if (bgService != null) bgService.stop()
+    if (bgService != null) bgService.use(null)
   }
 
   def checkText(key: String): Boolean = {
@@ -513,8 +511,8 @@ class Shadowsocks
   }
 
   /** Called when connect button is clicked. */
-  def serviceStart() {
-    bgService.start(ConfigUtils.load(ShadowsocksApplication.settings))
+  def serviceLoad() {
+    bgService.use(ConfigUtils.load(ShadowsocksApplication.settings))
 
     if (ShadowsocksApplication.isVpnEnabled) {
       changeSwitch(checked = false)
