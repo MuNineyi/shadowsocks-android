@@ -133,9 +133,9 @@ class Shadowsocks
             preferences.setEnabled(false)
             stat.setVisibility(View.VISIBLE)
             if (ShadowsocksApplication.isVpnEnabled) {
-              connectionTest.setVisibility(View.VISIBLE)
-              connectionTest.setText(getString(R.string.connection_test_pending))
-            } else connectionTest.setVisibility(View.GONE)
+              connectionTestText.setVisibility(View.VISIBLE)
+              connectionTestText.setText(getString(R.string.connection_test_pending))
+            } else connectionTestText.setVisibility(View.GONE)
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
             fabProgressCircle.postDelayed(hideCircle, 1000)
@@ -216,7 +216,7 @@ class Shadowsocks
 
   private var testCount: Int = _
   private lazy val stat = findViewById(R.id.stat)
-  private lazy val connectionTest = findViewById(R.id.connection_test).asInstanceOf[TextView]
+  private var connectionTestText: TextView = _
   private var txText: TextView = _
   private var rxText: TextView = _
   private var txRateText: TextView = _
@@ -369,6 +369,7 @@ class Shadowsocks
     val field = classOf[Toolbar].getDeclaredField("mTitleTextView")
     field.setAccessible(true)
     val title = field.get(toolbar).asInstanceOf[TextView]
+    title.setFocusable(true)
     title.setOnClickListener(_ => startActivity(new Intent(this, classOf[ProfileManagerActivity])))
     val typedArray = obtainStyledAttributes(Array(R.attr.selectableItemBackgroundBorderless))
     title.setBackgroundResource(typedArray.getResourceId(0, 0))
@@ -376,11 +377,12 @@ class Shadowsocks
     val tf = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
 
-    val connectionTestText = findViewById(R.id.connection_test).asInstanceOf[TextView]
+    connectionTestText = findViewById(R.id.connection_test).asInstanceOf[TextView]
     txText = findViewById(R.id.tx).asInstanceOf[TextView]
     txRateText = findViewById(R.id.txRate).asInstanceOf[TextView]
     rxText = findViewById(R.id.rx).asInstanceOf[TextView]
     rxRateText = findViewById(R.id.rxRate).asInstanceOf[TextView]
+    connectionTestText.setFocusable(true)
     connectionTestText.setOnClickListener(_ => {
       val id = synchronized {
         testCount += 1
@@ -470,9 +472,9 @@ class Shadowsocks
           fabProgressCircle.postDelayed(hideCircle, 100)
           stat.setVisibility(View.VISIBLE)
           if (ShadowsocksApplication.isVpnEnabled) {
-            connectionTest.setVisibility(View.VISIBLE)
-            connectionTest.setText(getString(R.string.connection_test_pending))
-          } else connectionTest.setVisibility(View.GONE)
+            connectionTestText.setVisibility(View.VISIBLE)
+            connectionTestText.setText(getString(R.string.connection_test_pending))
+          } else connectionTestText.setVisibility(View.GONE)
         case State.STOPPING =>
           fab.setBackgroundTintList(greyTint)
           serviceStarted = false
