@@ -207,6 +207,8 @@ class Shadowsocks
         .putString(Key.proxied, DBHelper.updateProxiedApps(this, oldProxiedApps)).apply()
 
       recovery()
+
+      updateCurrentProfile()
     }
   }
 
@@ -494,10 +496,7 @@ class Shadowsocks
     }
   }
 
-  protected override def onResume() {
-    super.onResume()
-    ConfigUtils.refresh(this)
-
+  private def updateCurrentProfile() {
     // Check if current profile changed
     if (ShadowsocksApplication.profileId != currentProfile.id) {
       currentProfile = ShadowsocksApplication.currentProfile match {
@@ -513,6 +512,14 @@ class Shadowsocks
 
       if (serviceStarted) serviceLoad()
     }
+  }
+
+  protected override def onResume() {
+    super.onResume()
+
+    ConfigUtils.refresh(this)
+
+    updateCurrentProfile()
 
     updateState()
   }
