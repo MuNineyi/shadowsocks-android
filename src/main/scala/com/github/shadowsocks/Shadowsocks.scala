@@ -545,7 +545,7 @@ class Shadowsocks
   override def onDestroy() {
     super.onDestroy()
     _isDestroyed = true
-    deattachService()
+    detachService()
     new BackupManager(this).dataChanged()
     handler.removeCallbacksAndMessages(null)
   }
