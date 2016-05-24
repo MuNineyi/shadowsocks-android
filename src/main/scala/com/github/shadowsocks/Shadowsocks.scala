@@ -596,7 +596,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 
   /** Called when connect button is clicked. */
   def serviceLoad() {
-    bgService.use(ConfigUtils.load(app.settings))
+    bgService.use(ConfigUtils.loadFromSharedPreferences)
 
     if (app.isVpnEnabled) {
       changeSwitch(checked = false)
