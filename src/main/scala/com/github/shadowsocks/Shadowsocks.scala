@@ -334,7 +334,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   }
 
   def prepareStartService() {
-    ThrowableFuture {
+    Utils.ThrowableFuture {
       if (ShadowsocksApplication.isVpnEnabled) {
         val intent = VpnService.prepare(this)
         if (intent != null) {
@@ -379,7 +379,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
         handler.post(() => connectionTestText.setText(R.string.connection_test_testing))
         testCount
       }
-      ThrowableFuture {
+      Utils.ThrowableFuture {
         // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
         autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection()
           .asInstanceOf[HttpURLConnection]) { conn =>
@@ -553,7 +553,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   def recovery() {
     if (serviceStarted) serviceStop()
     val h = showProgress(R.string.recovering)
-    ThrowableFuture {
+    Utils.ThrowableFuture {
       reset()
       h.sendEmptyMessage(0)
     }
@@ -561,7 +561,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 
   def flushDnsCache() {
     val h = showProgress(R.string.flushing)
-    ThrowableFuture {
+    Utils.ThrowableFuture {
       if (!Utils.toggleAirplaneMode(getBaseContext)) h.post(() => Snackbar.make(findViewById(android.R.id.content),
         R.string.flush_dnscache_no_root, Snackbar.LENGTH_LONG).show)
       h.sendEmptyMessage(0)
