@@ -51,6 +51,7 @@
 
         <activity
                 android:name=".ShadowsocksRunnerActivity"
+                android:process=":bg"
                 android:theme="@android:style/Theme.NoDisplay"
                 android:launchMode="singleTask">
         </activity>
@@ -85,6 +86,7 @@
                 android:launchMode="singleTask"/>
 
         <activity android:name=".TaskerActivity"
+                  android:process=":bg"
                   android:icon="@drawable/ic_launcher">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
@@ -92,6 +94,7 @@
         </activity>
 
         <activity android:name=".ShadowsocksQuickSwitchActivity"
+                  android:process=":bg"
                   android:launchMode="singleInstance"
                   android:excludeFromRecents="true"
                   android:taskAffinity=""
@@ -104,6 +107,7 @@
 
         <service
                 android:name=".ShadowsocksRunnerService"
+                android:process=":bg"
                 android:exported="false">
         </service>
 
@@ -133,13 +137,13 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".ShadowsocksReceiver">
+        <receiver android:name=".BootReceiver" android:enabled="false" android:process=":bg">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".TaskerReceiver" tools:ignore="ExportedReceiver">
+        <receiver android:name=".TaskerReceiver" tools:ignore="ExportedReceiver" android:process=":bg">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING"/>
             </intent-filter>
