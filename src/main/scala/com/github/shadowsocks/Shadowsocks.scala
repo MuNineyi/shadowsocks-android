@@ -176,7 +176,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   override def onServiceConnected() {
     // Update the UI
     if (fab != null) fab.setEnabled(true)
-    updateState(true)
+    updateState()
     if (Build.VERSION.SDK_INT >= 21 && app.isNatEnabled) {
       val snackbar = Snackbar.make(findViewById(android.R.id.content), R.string.nat_deprecated, Snackbar.LENGTH_LONG)
       snackbar.setAction(R.string.switch_to_vpn, (_ => preferences.natSwitch.setChecked(false)): View.OnClickListener)
@@ -443,7 +443,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     }
   }
 
-  private def updateState(initial: Boolean = false) {
+  private def updateState(resetConnectionTest: Boolean = true) {
     if (bgService != null) {
       bgService.getState match {
         case State.CONNECTING =>
@@ -460,7 +460,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
           preferences.setEnabled(false)
           fabProgressCircle.postDelayed(hideCircle, 100)
           stat.setVisibility(View.VISIBLE)
-          if (initial) if (app.isNatEnabled) connectionTestText.setVisibility(View.GONE) else {
+          if (resetConnectionTest) if (app.isNatEnabled) connectionTestText.setVisibility(View.GONE) else {
             connectionTestText.setVisibility(View.VISIBLE)
             connectionTestText.setText(getString(R.string.connection_test_pending))
           }
@@ -483,7 +483,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     }
   }
 
-  private def updateCurrentProfile() {
+  private def updateCurrentProfile() = {
     // Check if current profile changed
     if (app.profileId != currentProfile.id) {
       currentProfile = app.currentProfile match {
@@ -498,7 +498,9 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       updatePreferenceScreen()
 
       if (serviceStarted) serviceLoad()
-    }
+
+      true
+    } else false
   }
 
   protected override def onResume() {
@@ -506,9 +508,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 
     ConfigUtils.refresh(this)
 
-    updateCurrentProfile()
-
-    updateState()
+    updateState(updateCurrentProfile())
   }
 
   private def updatePreferenceScreen() {
