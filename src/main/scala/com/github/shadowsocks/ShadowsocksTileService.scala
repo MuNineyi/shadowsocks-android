@@ -32,7 +32,7 @@ final class ShadowsocksTileService extends TileService with ServiceBoundContext 
           tile.setState(Tile.STATE_INACTIVE)
         case State.CONNECTED =>
           tile.setIcon(iconConnected)
-          tile.setLabel(ShadowsocksApplication.currentProfile match {
+          tile.setLabel(app.currentProfile match {
             case Some(profile) => profile.name
             case None => getString(R.string.app_name)
           })
