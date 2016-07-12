@@ -114,7 +114,6 @@
 
         <service
                 android:name=".ShadowsocksRunnerService"
-                android:process=":bg"
                 android:exported="false">
         </service>
 
