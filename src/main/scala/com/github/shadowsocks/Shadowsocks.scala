@@ -64,6 +64,7 @@ import com.github.shadowsocks.database._
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.ShadowsocksApplication.app
+import eu.chainfire.libsuperuser.Shell
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -109,7 +110,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   // Services
   private val callback = new IShadowsocksServiceCallback.Stub {
     def stateChanged(s: Int, m: String) {
-      handler.post(() => if (state != s) {
+      handler.post(() => {
         s match {
           case State.CONNECTING =>
             fab.setBackgroundTintList(greyTint)
@@ -284,34 +285,17 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     val cmd = new ArrayBuffer[String]()
 
     for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks")) {
-      cmd.append("chmod 666 %s/%s-nat.pid".formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
-      cmd.append("chmod 666 %s/%s-vpn.pid".formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
-    }
-
-    if (app.isNatEnabled) Console.runRootCommand(cmd.toArray) else Console.runCommand(cmd.toArray)
-
-    cmd.clear()
-
-    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks")) {
-      try {
-        val pid_nat = scala.io.Source.fromFile(getApplicationInfo.dataDir + "/" + task + "-nat.pid").mkString.trim.toInt
-        val pid_vpn = scala.io.Source.fromFile(getApplicationInfo.dataDir + "/" + task + "-vpn.pid").mkString.trim.toInt
-        cmd.append("kill -9 %d".formatLocal(Locale.ENGLISH, pid_nat))
-        cmd.append("kill -9 %d".formatLocal(Locale.ENGLISH, pid_vpn))
-        Process.killProcess(pid_nat)
-        Process.killProcess(pid_vpn)
-      } catch {
-        case e: Throwable => // Ignore
-      }
-      cmd.append("rm -f %s/%s-nat.pid".formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
-      cmd.append("rm -f %s/%s-nat.conf".formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
-      cmd.append("rm -f %s/%s-vpn.pid".formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
-      cmd.append("rm -f %s/%s-vpn.conf".formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
+      cmd.append("killall %s".formatLocal(Locale.ENGLISH, task))
+      cmd.append("rm -f %1$s/%2$s-nat.conf %1$s/%2$s-vpn.conf"
+        .formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
     }
     if (app.isNatEnabled) {
-      Console.runRootCommand(cmd.toArray)
-      Console.runRootCommand(Utils.iptables + " -t nat -F OUTPUT")
-    } else Console.runCommand(cmd.toArray)
+      cmd.append("iptables -t nat -F OUTPUT")
+      cmd.append("echo done")
+      val result = Shell.SU.run(cmd.toArray)
+      if (result != null && !result.isEmpty) return // fallback to SH
+    }
+    Shell.SH.run(cmd.toArray)
   }
 
   def cancelStart() {
@@ -526,7 +510,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     for (executable <- EXECUTABLES) {
       ab.append("chmod 755 " + getApplicationInfo.dataDir + "/" + executable)
     }
-    Console.runCommand(ab.toArray)
+    Shell.SH.run(ab.toArray)
   }
 
   def recovery() {
