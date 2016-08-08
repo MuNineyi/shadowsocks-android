@@ -48,5 +48,4 @@ install:
     - popd
 
 script:
-    - cp local.properties.travis local.properties
-    - $SBT native-build android:package-release
+    - $SBTPATH/sbt native-build android:package-debug
