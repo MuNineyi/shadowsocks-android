@@ -25,6 +25,12 @@ cache:
         - $HOME/.ivy2
         - $HOME/.sbt
 
+android:
+    components:
+        - tools
+        - build-tools-24.0.1
+        - extra-google-m2repository
+
 install:
     - mkdir -p $HOME/.android
     - pushd $HOME/.android
