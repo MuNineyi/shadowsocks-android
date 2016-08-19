@@ -43,7 +43,7 @@ libraryDependencies ++= Seq(
   "dnsjava" % "dnsjava" % "2.1.7",
   "eu.chainfire" % "libsuperuser" % "1.0.0.201607041850",
   "me.dm7.barcodescanner" % "zxing" % "1.9",
-  "net.glxn.qrgen" % "android" % "2.0"s
+  "net.glxn.qrgen" % "android" % "2.0"
 )
 
 proguardVersion in Android := "5.2.1"
