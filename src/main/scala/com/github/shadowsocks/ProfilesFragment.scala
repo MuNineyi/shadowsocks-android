@@ -40,7 +40,6 @@ import com.github.shadowsocks.utils._
 import com.github.shadowsocks.widget.UndoSnackbarManager
 
 import scala.collection.mutable.ArrayBuffer
-import scala.util.Random
 
 object ProfilesFragment {
   var instance: ProfilesFragment = _  // used for callback from ProfileManager and stateChanged from MainActivity
