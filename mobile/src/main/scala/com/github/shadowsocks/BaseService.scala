@@ -126,6 +126,7 @@ trait BaseService extends Service {
 
   def connect() {
     profile.name = profile.getName  // save original name before it's (possibly) overwritten by IP addresses
+
     if (profile.host == "198.199.101.152") {
       val client = new OkHttpClient.Builder()
         .dns(hostname => Utils.resolve(hostname, enableIPv6 = false) match {
@@ -271,7 +272,6 @@ trait BaseService extends Service {
 
   override def onCreate() {
     super.onCreate()
-    app.remoteConfig.fetch()
     app.updateAssets()
   }
 
@@ -354,7 +354,7 @@ trait BaseService extends Service {
         .put("PrimaryDNS", new JSONArray().put(makeDns("Primary", "119.29.29.29")))
         .put("AlternativeDNS", remoteDns)
       case _ => config
-        .put("PrimaryDNS", new JSONArray(remoteDns))
+        .put("PrimaryDNS", remoteDns)
         // no need to setup AlternativeDNS in Acl.ALL/BYPASS_LAN mode
         .put("OnlyPrimaryDNS", true)
     }
